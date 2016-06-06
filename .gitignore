@@ -1,0 +1,6 @@
+.vs/
+database/bin
+database/obj
+processor/bin
+processor/obj
+packages/
