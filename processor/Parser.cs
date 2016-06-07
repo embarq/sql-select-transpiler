@@ -9,10 +9,14 @@ namespace processor
         /// <summary>
         /// Parse current SQL Expression Lexer Map
         /// </summary>
-        /// <param name="elm">Expression Lexer Map</param>
-        public static void Parse(List<Token> elm)
+        public static void Parse(TokenCollection tokens)
         {
             Console.WriteLine("Parser started...");
+            if (!(tokens.HasType("select") && tokens.HasType("from")))
+            {
+                throw new ArgumentException("`SELECT` or `FROM` statement's missing", "tokens");
+                
+            }
         }
     }
 }

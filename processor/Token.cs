@@ -2,15 +2,15 @@
 {
     class Token
     {
-        public string type;
-        public string value;
-        public int index;
+        public string Type;
+        public string Value;
+        public int Index;
 
         public Token(string type, string value, int index)
         {
-            this.type = type;
-            this.value = value;
-            this.index = index;
+            Type = type;
+            Value = value;
+            Index = index;
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
 
 namespace processor
 {
@@ -7,13 +10,23 @@ namespace processor
         List<Token> collection;
         int currentIndex;
 
+        public bool HasType(string type)
+        {   
+            return this.collection.Any(
+                token => new Regex(type, RegexOptions.IgnoreCase)
+                .Match(Config.Patterns.Statement.Match(token.Type).Value).Value != "");
+        }
+
         public TokenCollection Add(Token stmt)
         {
             this.collection.Add(stmt);
             return this;
         }
 
-        public List<Token> GetList()
+        /// <summary>
+        /// Return `List` data structure instead of TokenCollection
+        /// </summary>
+        public List<Token> Get()
         {
             return this.collection;
         }
@@ -23,28 +36,21 @@ namespace processor
             return this;
         }
 
+        /// <summary>
+        /// Return token which has current type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public Token GetByType(string type)
         {
-            foreach (Token stmt in this.collection)
-            {
-                if (stmt.type == type)
-                {
-                    return stmt;
-                }
-            }
-            return null;
+            Token found = this.collection.Find(token => token.Type.Equals(type));
+            return found != null ? found : null;
         }
 
         public Token GetByValue(string value)
         {
-            foreach (Token stmt in this.collection)
-            {
-                if (stmt.value == value)
-                {
-                    return stmt;
-                }
-            }
-            return null;
+            Token found = this.collection.Find(token => token.Value.Equals(value));
+            return found != null ? found : null;
         }
 
         public Token Next()

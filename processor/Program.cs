@@ -12,17 +12,28 @@ namespace processor
             foreach (var token in tokens.GetList())
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("[{0,2}]", token.index);
+                Console.Write("[{0,2}]", token.Index);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("{0,10}", token.value);
+                Console.Write("{0,10}", token.Value);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write(" => ");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(token.type);
+                Console.Write(token.Type);
                 Console.WriteLine();
             }
-            
-            //Parser.Parse(TokenCollection);
+
+            Console.WriteLine();
+            try
+            {
+                Parser.Parse(tokens);
+            } catch(ArgumentException err)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine(err);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+            }
 
             Console.Read();
         }
