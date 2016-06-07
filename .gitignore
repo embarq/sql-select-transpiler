@@ -3,4 +3,6 @@ database/bin
 database/obj
 processor/bin
 processor/obj
+config/bin
+config/obj
 packages/
