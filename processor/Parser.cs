@@ -30,13 +30,74 @@ namespace processor
             }
         }
 
-        TokenCollection GetStatementRange(Token statement)
+        TokenCollection ParseStatement(Token token)
         {
-            
+            TokenCollection range = GetStatementRange(token);
+
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("`{0}` range is {1}",
+                token.Type,
+                range.TokenString);
+
+            range.Print();
+            Console.ForegroundColor = ConsoleColor.White;
+
+            foreach (Token range_token in range.List)
+            {
+
+            }
+
+            return range;
+        }
+
+        TokenCollection ParseFunction(Token token)
+        {
+            var range = GetFunctionRange(token);
+            bool[] check = {
+                Config.Patterns.Function.IsMatch(range.Get(0).Type),
+                Config.Patterns.OpenParenthes.IsMatch(range.Get(1).Type),
+                Config.Patterns.Variable.IsMatch(range.Get(2).Type),
+                Config.Patterns.CloseParenthes.IsMatch(range.Get(3).Type)
+            };
+
+            if (check.All(item => item))
+            {
+                return range;
+            }
+            else
+            {
+                throw new Exception(string.Format(
+                    "Invalid syntax in function {0}",
+                    check.Select(item => item != true)));
+            }
+        }
+
+        TokenCollection GetFunctionRange(Token token)
+        {
             TokenCollection tokenRange = new TokenCollection();
-            int tokenCounter = statement.Index + 1;
-            Regex pattern = Config.Patterns.Statement.IsMatch(statement.Type) ?
-                Config.Patterns.Statement : Config.Patterns.Function;
+            int tokenCounter = token.Index + 1;
+
+            try
+            {
+                while (Tokens.List[tokenCounter].Type != "separator")
+                {
+                    tokenRange.Add(Tokens.Get(tokenCounter++));
+                }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return tokenRange;
+            }
+
+            return tokenRange;
+        }
+
+        TokenCollection GetStatementRange(Token token)
+        {
+            TokenCollection tokenRange = new TokenCollection();
+            int tokenCounter = token.Index + 1;
+            Regex pattern = Config.Patterns.Statement;
 
             try
             {
@@ -51,21 +112,6 @@ namespace processor
             }
 
             return tokenRange;
-        }
-
-        TokenCollection ParseStatement(Token statement) {
-            TokenCollection range = GetStatementRange(statement);
-
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("`{0}` range is {1}", 
-                statement.Type,
-                range.TokenString);
-
-            range.Print();
-            Console.ForegroundColor = ConsoleColor.White;
-
-            return range;
         }
     }
 }

@@ -10,6 +10,8 @@ namespace processor
             SQL = @"SELECT max(arg), field from another_table where field = 2 + 5";
             var tokens = new Lexer(SQL).Analyze();
 
+            Console.WriteLine(Config.Patterns.Lexer.ToString());
+
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(SQL);
             Console.ForegroundColor = ConsoleColor.White;
