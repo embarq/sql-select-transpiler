@@ -74,6 +74,14 @@ namespace processor
             }
         }
 
+        public string TokenValueString
+        {
+            get
+            {
+                return string.Join("", List.ConvertAll<string>(token => token.Value));
+            }
+        }
+
         public void Print()
         {
             foreach (var token in List)

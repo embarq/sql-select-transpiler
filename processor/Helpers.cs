@@ -12,7 +12,7 @@ namespace processor
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(err.Message, err.Data);
+            Console.WriteLine(err);
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Black;
         }

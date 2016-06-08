@@ -65,17 +65,21 @@ namespace processor
                 // <func_name> <parenthes> <argument> <parenthes>
             }
 
+            Console.WriteLine(range.TokenValueString);
+
             bool[] check = {
                 // For understanding this magic(matching `Type` instead of `Value`) see the `Function`'s pattern reference
                 Config.Patterns.Function.IsMatch(range.Get(0).Type),    
                 Config.Patterns.OpenParenthes.IsMatch(range.Get(1).Value),
-                Config.Patterns.Variable.IsMatch(range.Get(2).Value),
+                Config.Patterns.Argument.IsMatch(range.TokenValueString),
                 Config.Patterns.CloseParenthes.IsMatch(range.Get(3).Value)
             };
 
             if (check.All(item => item)) // If everything allright...
             {
-                return range;
+                this.Tokens = new TokenCollection(this.Tokens.List.Except(range.List).ToList());
+                return new TokenCollection(range.List.Where(
+                    _token => !Config.Patterns.Parenthes.IsMatch(_token.Value)).ToList());
             }
             else    // ... else let's do panic
             {
@@ -110,7 +114,7 @@ namespace processor
 
             try
             {
-                // Till next statement
+                // To next statement
                 while (!Config.Patterns.Statement.IsMatch(Tokens.List[tokenCounter].Type))
                 {
                     var currentToken = Tokens.Get(tokenCounter++);
@@ -120,9 +124,9 @@ namespace processor
                         try
                         {
                             functionTokenRange = ParseFunction(currentToken);
-                            Console.WriteLine("`{0}` range is {1}",
-                                token.Type,
-                                functionTokenRange.TokenString);
+                            //Console.WriteLine("Function `{0}` range is {1}",
+                            //    token.Type,
+                            //    functionTokenRange.TokenString);
                         }
                         catch (Exception err)
                         {

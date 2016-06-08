@@ -21,6 +21,7 @@ namespace processor
             public static string Functions = @"(?<max_func>max)|(?<min_func>min)|(?<count_func>count)|(?<sum_func>sum)|(?<avg_func>avg)|(?<length_func>length)";
             public static string Alias = @"(?<alias>as)";
             public static string Separator = @"(?:\s*(?<separator>\,)\s*)";
+            public static string Parenthes = @"(?<parenthes>\(|\))";
             public static string OpenParenthes = @"(?<open_parenthes>\()";
             public static string CloseParenthes = @"(?<close_parenthes>\))";
             public static string Argument = @"(?>\w{1,6}\()(?<argument>\w+)(?:\))";
@@ -54,11 +55,13 @@ namespace processor
             public static Regex Function = new Regex(patterns.Function, RegexOptions.IgnoreCase);
             public static Regex Variable = new Regex(patterns.Variable, RegexOptions.IgnoreCase);
             public static Regex Digits = new Regex(patterns.Digits);
+            public static Regex Parenthes = new Regex(patterns.Parenthes);
             public static Regex OpenParenthes = new Regex(patterns.OpenParenthes);
             public static Regex CloseParenthes = new Regex(patterns.CloseParenthes);
             public static Regex Separator = new Regex(patterns.Separator);
             public static Regex Comparators = new Regex(patterns.Comparators);
             public static Regex Arythmetics = new Regex(patterns.Arythmetics);
+            public static Regex Argument = new Regex(patterns.Argument);
         }
     }
 }
