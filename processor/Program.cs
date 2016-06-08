@@ -7,26 +7,20 @@ namespace processor
         static void Main(string[] args)
         {
             string SQL = @"SELECT max(arg), field, min(lofw_s5t) from table group by field where field = 2 + 5";
+            SQL = @"SELECT max(arg), field from another_table where field = 2 + 5";
             var tokens = new Lexer(SQL).Analyze();
 
-            foreach (var token in tokens.GetList())
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("[{0,2}]", token.Index);
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("{0,10}", token.Value);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(" => ");
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(token.Type);
-                Console.WriteLine();
-            }
-
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(SQL);
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(tokens.TokenString);
             Console.WriteLine();
+
             try
             {
-                Parser.Parse(tokens);
-            } catch(ArgumentException err)
+                Parser parser = new Parser(tokens);
+            }
+            catch (ArgumentException err)
             {
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.BackgroundColor = ConsoleColor.DarkRed;

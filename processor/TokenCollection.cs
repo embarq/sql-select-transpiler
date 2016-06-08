@@ -8,7 +8,17 @@ namespace processor
     class TokenCollection
     {
         List<Token> collection;
-        int currentIndex;
+
+        /// <summary>
+        /// Return `List` data structure instead of TokenCollection
+        /// </summary>
+        public List<Token> List
+        {
+            get
+            {
+                return this.collection;
+            }
+        }
 
         public bool HasType(string type)
         {   
@@ -23,24 +33,14 @@ namespace processor
             return this;
         }
 
-        /// <summary>
-        /// Return `List` data structure instead of TokenCollection
-        /// </summary>
-        public List<Token> Get()
+        public Token Get(int index)
         {
-            return this.collection;
-        }
-
-        public TokenCollection GetCollection()
-        {
-            return this;
+            return this.collection.ElementAt(index);
         }
 
         /// <summary>
         /// Return token which has current type
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public Token GetByType(string type)
         {
             Token found = this.collection.Find(token => token.Type.Equals(type));
@@ -53,26 +53,41 @@ namespace processor
             return found != null ? found : null;
         }
 
-        public Token Next()
-        {
-            return this.collection[++this.currentIndex];
-        }
-
-        public Token Current()
-        {
-            return this.collection[this.currentIndex];
-        }
-
         public TokenCollection()
         {
             this.collection = new List<Token>();
-            this.currentIndex = -1;
         }
 
         public TokenCollection(List<Token> collection)
         {
             this.collection = collection;
-            this.currentIndex = 0;
+        }
+
+        public string TokenString
+        {
+            get
+            {
+                return string.Format("<{0}>", 
+                    string.Join(" ", 
+                        List.ConvertAll<string>(
+                            token => string.Format("<{0}>", token.Type))));
+            }
+        }
+
+        public void Print()
+        {
+            foreach (var token in List)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("[{0,2}]", token.Index);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("{0,15}", token.Value);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write(" => ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write(token.Type);
+                Console.WriteLine();
+            }
         }
     }
 }
