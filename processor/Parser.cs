@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System;
 
 namespace processor
@@ -17,10 +16,10 @@ namespace processor
 
             if (!(tokens.HasType("select") && tokens.HasType("from")))
             {
-                throw new ArgumentException("Missing `SELECT` or `FROM` statement", "tokens");
+                throw SqlException.StatementsException;
             }
 
-            // Parsing starts from only statements
+            // Парсинг начинается с statement'ов
             foreach (Token token in tokens.List)
             {
                 if (Config.Patterns.Statement.IsMatch(token.Type))
@@ -32,7 +31,16 @@ namespace processor
 
         TokenCollection ParseStatement(Token token)
         {
-            TokenCollection range = GetStatementRange(token);
+            TokenCollection range = null;
+            try
+            {
+                range = GetStatementRange(token);
+            }
+            catch (Exception err)
+            {
+                Helpers.Logger(err);
+            }
+            
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -43,40 +51,42 @@ namespace processor
             range.Print();
             Console.ForegroundColor = ConsoleColor.White;
 
-            foreach (Token range_token in range.List)
-            {
-
-            }
-
             return range;
         }
-
+        
         TokenCollection ParseFunction(Token token)
         {
             var range = GetFunctionRange(token);
+
+            if (range.List.Count != 4)
+            {
+                throw SqlException.FunctionException;
+                // Cauze a SQL function should consist of four tokens:
+                // <func_name> <parenthes> <argument> <parenthes>
+            }
+
             bool[] check = {
-                Config.Patterns.Function.IsMatch(range.Get(0).Type),
-                Config.Patterns.OpenParenthes.IsMatch(range.Get(1).Type),
-                Config.Patterns.Variable.IsMatch(range.Get(2).Type),
-                Config.Patterns.CloseParenthes.IsMatch(range.Get(3).Type)
+                // For understanding this magic(matching `Type` instead of `Value`) see the `Function`'s pattern reference
+                Config.Patterns.Function.IsMatch(range.Get(0).Type),    
+                Config.Patterns.OpenParenthes.IsMatch(range.Get(1).Value),
+                Config.Patterns.Variable.IsMatch(range.Get(2).Value),
+                Config.Patterns.CloseParenthes.IsMatch(range.Get(3).Value)
             };
 
-            if (check.All(item => item))
+            if (check.All(item => item)) // If everything allright...
             {
                 return range;
             }
-            else
+            else    // ... else let's do panic
             {
-                throw new Exception(string.Format(
-                    "Invalid syntax in function {0}",
-                    check.Select(item => item != true)));
+                throw SqlException.FunctionException;
             }
         }
 
         TokenCollection GetFunctionRange(Token token)
         {
             TokenCollection tokenRange = new TokenCollection();
-            int tokenCounter = token.Index + 1;
+            int tokenCounter = token.Index;
 
             try
             {
@@ -97,13 +107,39 @@ namespace processor
         {
             TokenCollection tokenRange = new TokenCollection();
             int tokenCounter = token.Index + 1;
-            Regex pattern = Config.Patterns.Statement;
 
             try
             {
-                while (!pattern.IsMatch(Tokens.List[tokenCounter].Type))
+                // Till next statement
+                while (!Config.Patterns.Statement.IsMatch(Tokens.List[tokenCounter].Type))
                 {
-                    tokenRange.Add(Tokens.Get(tokenCounter++));
+                    var currentToken = Tokens.Get(tokenCounter++);
+                    if (Config.Patterns.Function.IsMatch(currentToken.Type))
+                    {
+                        TokenCollection functionTokenRange = null;
+                        try
+                        {
+                            functionTokenRange = ParseFunction(currentToken);
+                            Console.WriteLine("`{0}` range is {1}",
+                                token.Type,
+                                functionTokenRange.TokenString);
+                        }
+                        catch (Exception err)
+                        {
+                            throw err;
+                        }
+                        
+                        tokenRange.List.AddRange(functionTokenRange.List);
+                    }
+                    else if (Config.Patterns.Variable.IsMatch(currentToken.Type) ||
+                        Config.Patterns.Separator.IsMatch(currentToken.Type))
+                    {
+                        tokenRange.Add(currentToken);
+                    }
+                    else
+                    {
+                        throw SqlException.SelectStatementException;
+                    }
                 }
             }
             catch (ArgumentOutOfRangeException)

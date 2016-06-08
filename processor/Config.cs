@@ -1,8 +1,18 @@
-﻿using System.Linq;
+﻿using System;
 using System.Text.RegularExpressions;
 
 namespace processor
 {
+    public class SqlException : System.Exception
+    {
+        public static InvalidOperationException FunctionException =
+            new InvalidOperationException("Invalid syntax of SQL function");
+        public static InvalidOperationException SelectStatementException =
+            new InvalidOperationException("Invalid `SELECT` SQL statement");
+        public static ArgumentException StatementsException =
+            new ArgumentException("Missing `SELECT` or `FROM` statement", "tokens");
+    }
+
     public class Config
     {
         struct patterns
@@ -13,6 +23,7 @@ namespace processor
             public static string Separator = @"(?:\s*(?<separator>\,)\s*)";
             public static string OpenParenthes = @"(?<open_parenthes>\()";
             public static string CloseParenthes = @"(?<close_parenthes>\))";
+            public static string Argument = @"(?>\w{1,6}\()(?<argument>\w+)(?:\))";
             public static string Digits = @"(?<digit>\d+)";
             public static string Variable = @"(?<variable>(?:\w{1,18}))";
             public static string Comparators = @"(?<equals>\=)|(?<not_equals>\!\=)|(?<less>\<)|(?<greater>\>)";
