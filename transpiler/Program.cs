@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace processor
+namespace transpiler
 {
     class Program
     {
         static void Main(string[] args)
         {
             string SQL = @"SELECT max(arg), field, min(lofw_s5t) from table group by field where field = 2 + 5";
-            SQL = @"SELECT max(arg), field from table where field = 2 + 5";
+            SQL = @"SELECT max(reputation), id, name FROM users WHERE id = 2 + 5";
 
             var tokens = new Lexer(SQL).Analyze();
 

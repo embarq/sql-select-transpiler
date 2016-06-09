@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
-namespace processor
+namespace transpiler
 {
     class Lexer
     {

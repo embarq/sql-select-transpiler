@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace processor
+namespace transpiler
 {
     public class SqlException : System.Exception
     {
@@ -32,7 +32,7 @@ namespace processor
             public static string Statement = @"(?:(\w+)(?:_)(?:stmt))|(?:(?:stmt)(?:_)(\w+))";
             public static string Function = @"(?:(\w+)(?:_)(?:func))|(?:(?:func)(?:_)(\w+))";
 
-            static string[] Lexems = { Statements, Functions, Alias, Separator, OpenParenthes, CloseParenthes, Digits, Variable, Comparators, Arythmetics };
+            static string[] Lexems = { Statements, Functions, Argument, Alias, Separator, OpenParenthes, CloseParenthes, Digits, Variable, Comparators, Arythmetics };
             public static string Lexer = string.Join("|", Lexems);
         }
 

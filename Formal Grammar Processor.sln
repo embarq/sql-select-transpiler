@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "processor", "processor\processor.csproj", "{FD458731-72A6-4789-87D1-063DCE62EF3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "transpiler", "transpiler\transpiler.csproj", "{FD458731-72A6-4789-87D1-063DCE62EF3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "database", "database\database.csproj", "{E665767F-4825-4B29-B4A3-1084341B7991}"
 EndProject

@@ -1,8 +1,9 @@
 .vs/
+packages/
 database/bin
 database/obj
-processor/bin
-processor/obj
+transpiler/bin
+transpiler/obj
 config/bin
 config/obj
-packages/
+readme-draft.md

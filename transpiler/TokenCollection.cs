@@ -3,7 +3,7 @@ using System.Linq;
 using System;
 using System.Text.RegularExpressions;
 
-namespace processor
+namespace transpiler
 {
     class TokenCollection
     {
