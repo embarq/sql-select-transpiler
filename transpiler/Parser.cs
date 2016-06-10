@@ -37,27 +37,27 @@ namespace transpiler
 
         TokenCollection ParseStatement(Token token)
         {
-            TokenCollection range = null;
+            TokenCollection statementRange = new TokenCollection();
+
             try
             {
-                range = GetStatementRange(token);
+                statementRange = GetStatementRange(token);
             }
             catch (Exception err)
             {
                 throw err;
             }
             
-
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("`{0}` range is {1}",
+            Console.WriteLine("`{0}` statement range is {1}",
                 token.Type,
-                range.TokenString);
+                statementRange.TokenString);
 
-            range.Print();
+            statementRange.Print();
             Console.ForegroundColor = ConsoleColor.White;
 
-            return range;
+            return statementRange;
         }
 
         TokenCollection GetStatementRange(Token token)
@@ -67,38 +67,42 @@ namespace transpiler
 
             try
             {
-                // To next statement
-                while (!Config.Patterns.Statement.IsMatch(Tokens.Get(tokenCounter).Type))
+                while (!Config.Patterns.Statement.IsMatch(Tokens.GetByIndex(tokenCounter).Type))
                 {
-                    var currentToken = Tokens.Get(tokenCounter++);
+                    var currentToken = Tokens.GetByIndex(tokenCounter++);
 
                     if (Config.Patterns.Function.IsMatch(currentToken.Type))
                     {
-                        TokenCollection functionTokenRange = null;
-
                         try
                         {
-                            functionTokenRange = ParseFunction(currentToken);
-                            Console.ForegroundColor = ConsoleColor.Cyan;
-                            Console.WriteLine(functionTokenRange.TokenString);
-                            Console.ForegroundColor = ConsoleColor.White;
-                            tokenRange.List.AddRange(functionTokenRange.List);  // Replace natively
+                            tokenRange.Add(ParseFunction(currentToken));
+                            tokenCounter += 3;
                         }
                         catch (Exception err)
                         {
                             throw err;
                         }
                     }
-                    else if (Config.Patterns.Variable.IsMatch(currentToken.Type) ||
-                        Config.Patterns.Separator.IsMatch(currentToken.Type))
+                    else if (Config.Patterns.Variable.IsMatch(currentToken.Value) ||
+                        Config.Patterns.Arythmetics.IsMatch(currentToken.Value) ||
+                        Config.Patterns.Comparators.IsMatch(currentToken.Value))
                     {
                         tokenRange.Add(currentToken);
+                    }
+                    else if (Config.Patterns.Separator.IsMatch(currentToken.Value))
+                    {
+                        continue;
                     }
                     else
                     {
                         throw SqlException.SelectStatementException;
                     }
                 }
+            }
+            // This two catches are going to catch overrange
+            catch (NullReferenceException)
+            {
+                return tokenRange;
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -149,9 +153,10 @@ namespace transpiler
 
             try
             {
-                while (Tokens.Get(tokenCounter).Type != "separator")
+                while (Tokens.GetByIndex(tokenCounter).Type.Equals("separator") ||
+                    !Config.Patterns.Statement.IsMatch(Tokens.GetByIndex(tokenCounter).Type))
                 {
-                    tokenRange.Add(Tokens.Get(tokenCounter++));
+                    tokenRange.Add(Tokens.GetByIndex(tokenCounter++));
                 }
             }
             catch (ArgumentOutOfRangeException)

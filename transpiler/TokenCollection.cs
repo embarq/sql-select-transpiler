@@ -7,7 +7,7 @@ namespace transpiler
 {
     class TokenCollection
     {
-        List<Token> collection;
+        private List<Token> collection;
 
         /// <summary>
         /// Return `List` data structure instead of TokenCollection
@@ -16,51 +16,89 @@ namespace transpiler
         {
             get
             {
-                return this.collection;
+                return collection;
             }
-        }
-
-        public bool HasType(string type)
-        {   
-            return this.collection.Any(
-                token => new Regex(type, RegexOptions.IgnoreCase)
-                .Match(Config.Patterns.Statement.Match(token.Type).Value).Value != "");
         }
 
         public TokenCollection Add(Token stmt)
         {
-            this.collection.Add(stmt);
+            collection.Add(stmt);
             return this;
         }
 
+        public TokenCollection Add(TokenCollection anotherCollection)
+        {
+            collection.AddRange(anotherCollection.List);
+            return this;
+        }
+        
         public Token Get(int index)
         {
-            return this.collection.ElementAt(index);
+            return collection.ElementAt(index);
         }
 
-        /// <summary>
-        /// Return token which has current type
-        /// </summary>
         public Token GetByType(string type)
         {
-            Token found = this.collection.Find(token => token.Type.Equals(type));
-            return found != null ? found : null;
+            Token found = collection.Find(token => token.Type.Equals(type));
+            if (found.Equals(null))
+            {
+                throw new NullReferenceException(string.Format("Token with `{0}` type not present", type));
+            } 
+            else
+            {
+                return found;
+            }
         }
 
         public Token GetByValue(string value)
         {
-            Token found = this.collection.Find(token => token.Value.Equals(value));
-            return found != null ? found : null;
+            Token found = collection.Find(token => token.Value.Equals(value));
+            if (found.Equals(null))
+            {
+                throw new NullReferenceException(string.Format("Token with `{0}` value not present", value));
+            }
+            else
+            {
+                return found;
+            }
+        }
+
+        public Token GetByIndex(int index)
+        {
+            Token found = collection.Find(token => token.Index == index);
+            if (found.Equals(null))
+            {
+                throw new NullReferenceException(string.Format("Token with `{0}` index not present", index));
+            }
+            else
+            {
+                return found;
+            }
+        }
+
+        public bool HasType(string type)
+        {
+            return collection.Any(
+                token => new Regex(type, RegexOptions.IgnoreCase)
+                .Match(Config.Patterns.Statement.Match(token.Type).Value).Value != "");
         }
 
         public TokenCollection()
         {
-            this.collection = new List<Token>();
+            collection = new List<Token>();
         }
 
         public TokenCollection(List<Token> collection)
         {
             this.collection = collection;
+        }
+
+        public List<string> TokenList
+        {
+            get
+            {
+                return List.Select(token => token.Type).ToList();
+            }
         }
 
         public string TokenString
