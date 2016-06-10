@@ -20,7 +20,7 @@ namespace transpiler
             // Парсинг начинается с statement'ов
             foreach (Token token in this.Tokens.List)
             {
-                if (Config.Patterns.Statement.IsMatch(token.Type))
+                if (token.IsStatement)
                 {
                     try
                     {
@@ -67,22 +67,22 @@ namespace transpiler
 
             try
             {
-                while (!Config.Patterns.Statement.IsMatch(Tokens.GetByIndex(tokenCounter).Type))
+                while (!Tokens.GetByIndex(tokenCounter).IsStatement)
                 {
                     var currentToken = Tokens.GetByIndex(tokenCounter++);
 
-                    if (token.Type.Equals("where_stmt"))
+                    if (currentToken.IsStatementType("where"))
                     {
                         try
                         {
                             tokenRange.Add(ParseWhereStatement(currentToken));
                         }
-                        catch (Exception err)
+                        catch (InvalidOperationException err)
                         {
                             throw err;
                         }
                     }
-                    else if (Config.Patterns.Function.IsMatch(currentToken.Type))
+                    else if (currentToken.IsFunction)
                     {
                         try
                         {
@@ -94,13 +94,11 @@ namespace transpiler
                             throw err;
                         }
                     }
-                    else if (Config.Patterns.Variable.IsMatch(currentToken.Value) ||
-                        Config.Patterns.Arythmetics.IsMatch(currentToken.Value) ||
-                        Config.Patterns.Comparators.IsMatch(currentToken.Value))
+                    else if (currentToken.IsVariable || currentToken.IsArythmetic || currentToken.IsComparator)
                     {
                         tokenRange.Add(currentToken);
                     }
-                    else if (Config.Patterns.Separator.IsMatch(currentToken.Value))
+                    else if (currentToken.IsSeparator)
                     {
                         continue;
                     }
@@ -125,13 +123,64 @@ namespace transpiler
 
         TokenCollection ParseWhereStatement(Token token)
         {
+            TokenCollection clauseExpression = null;
+            try
+            {
+                clauseExpression = ParseClauseExpression(token);
+            }
+            catch (InvalidOperationException)
+            {
+                throw SqlException.WhereStatementException;
+            }
+
+            return clauseExpression;
+        }
+
+        TokenCollection ParseClauseExpression(Token token)
+        {
             var clauseRange = GetClauseRange(token);
+            var comparator = clauseRange.List.Find(_token => _token.IsComparator);
+            var left = clauseRange.Get(0);
+            var right = clauseRange.Get(2);
+
+            if (comparator.Equals(null))
+            {
+                throw SqlException.ClauseExpressionException;
+            }
+
+            return clauseRange;
         }
 
         TokenCollection GetClauseRange(Token token)
         {
             var tokenRange = new TokenCollection();
+            int tokenCounter = token.Index;
 
+            try {
+                while (!Tokens.GetByIndex(tokenCounter).IsStatement || !Tokens.GetByIndex(tokenCounter).IsEOF)
+                {
+                    var currentToken = Tokens.GetByIndex(tokenCounter++);
+
+                    if (currentToken.IsVariable ||
+                        currentToken.IsArythmetic ||
+                        currentToken.IsDigit ||
+                        currentToken.IsComparator ||
+                        currentToken.IsParenthes)
+                    {
+                        tokenRange.Add(currentToken);
+                    }
+                    else
+                    {
+                        throw SqlException.WhereStatementException;
+                    }
+                }
+            }
+            catch (NullReferenceException)
+            {
+                return tokenRange;
+            }
+
+            return tokenRange;
         }
 
         TokenCollection ParseFunction(Token token)
@@ -153,12 +202,9 @@ namespace transpiler
             };
 
             if (check.All(item => item))
-            // If everything allright updating tokens sub-set
-            // and return a function name and it's argument. Else do panic:)
             {
                 range.Get(2).Type = "argument";
-
-                Tokens = new TokenCollection(Tokens.List.Except(range.List).ToList());
+                
                 return new TokenCollection(range.List.Where(
                     _token => !Config.Patterns.Parenthes.IsMatch(_token.Value)).ToList());
             }

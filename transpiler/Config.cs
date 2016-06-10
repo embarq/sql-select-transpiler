@@ -7,8 +7,16 @@ namespace transpiler
     {
         public static InvalidOperationException FunctionException =
             new InvalidOperationException("Invalid syntax of SQL function");
+
         public static InvalidOperationException SelectStatementException =
             new InvalidOperationException("Invalid `SELECT` SQL statement");
+
+        public static InvalidOperationException WhereStatementException =
+            new InvalidOperationException("Invalid `WHERE` SQL statement");
+
+        public static InvalidOperationException ClauseExpressionException =
+            new InvalidOperationException("Invalid clause expression");
+
         public static ArgumentException StatementsException =
             new ArgumentException("Missing `SELECT` or `FROM` statement", "tokens");
     }
@@ -33,6 +41,7 @@ namespace transpiler
             public static string Arythmetics = @"(?<add>\+)|(?<substract>\-)";
             public static string EOF = @"(?<eof>\;)";
             public static string Statement = @"(?:(\w+)(?:_)(?:stmt))|(?:(?:stmt)(?:_)(\w+))";
+            //public static string whereStatement = @"(where)";
             public static string Function = @"(?:(\w+)(?:_)(?:func))|(?:(?:func)(?:_)(\w+))";
 
             static string[] Lexems = { Statements, Functions, Argument, Alias, Separator, OpenParenthes, CloseParenthes, Digits, Variable, Comparators, Arythmetics };
@@ -65,6 +74,7 @@ namespace transpiler
             public static Regex Comparators = new Regex(patterns.Comparators);
             public static Regex Arythmetics = new Regex(patterns.Arythmetics);
             public static Regex Argument = new Regex(patterns.Argument);
+            public static Regex EOF = new Regex(patterns.EOF);
         }
     }
 }
