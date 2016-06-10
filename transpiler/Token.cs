@@ -34,7 +34,7 @@
 
         public bool IsStatementType(string statementType)
         {
-            return new System.Text.RegularExpressions.Regex(string.Format("({0})", statementType), System.Text.RegularExpressions.RegexOptions.IgnoreCase).IsMatch(Config.Patterns.Statement.Match(this.Type).Groups[0].Value);
+            return new System.Text.RegularExpressions.Regex(string.Format("({0})", statementType), System.Text.RegularExpressions.RegexOptions.IgnoreCase).IsMatch(Config.Patterns.Statement.Match(this.Type).Groups[1].Value);
         }
 
         public bool IsFunction

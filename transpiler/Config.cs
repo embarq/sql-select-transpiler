@@ -39,12 +39,15 @@ namespace transpiler
             public static string Variable = @"(?<variable>(?:\w{1,18}))";
             public static string Comparators = @"(?<equals>\=)|(?<not_equals>\!\=)|(?<less>\<)|(?<greater>\>)";
             public static string Arythmetics = @"(?<add>\+)|(?<substract>\-)";
-            public static string EOF = @"(?<eof>\;)";
+            public static string EOF = @"(?<eof>;)";
             public static string Statement = @"(?:(\w+)(?:_)(?:stmt))|(?:(?:stmt)(?:_)(\w+))";
-            //public static string whereStatement = @"(where)";
             public static string Function = @"(?:(\w+)(?:_)(?:func))|(?:(?:func)(?:_)(\w+))";
 
-            static string[] Lexems = { Statements, Functions, Argument, Alias, Separator, OpenParenthes, CloseParenthes, Digits, Variable, Comparators, Arythmetics };
+            static string[] Lexems = {
+                Statements, Functions, Argument, Alias, Separator,
+                OpenParenthes, CloseParenthes, Digits, Variable,
+                Comparators, Arythmetics, EOF
+            };
             public static string Lexer = string.Join("|", Lexems);
         }
 

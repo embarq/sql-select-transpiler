@@ -79,8 +79,7 @@ namespace transpiler
         public bool HasType(string type)
         {
             return collection.Any(
-                token => new Regex(type, RegexOptions.IgnoreCase)
-                .Match(Config.Patterns.Statement.Match(token.Type).Value).Value != "");
+                token => new Regex(type, RegexOptions.IgnoreCase).IsMatch(token.Type));
         }
 
         public TokenCollection()

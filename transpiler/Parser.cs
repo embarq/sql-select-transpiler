@@ -12,7 +12,7 @@ namespace transpiler
         {
             this.Tokens = tokens;
 
-            if (!(tokens.HasType("select") && tokens.HasType("from")))
+            if (!(tokens.HasType("select") && tokens.HasType("from") && tokens.HasType("eof")))
             {
                 throw SqlException.StatementsException;
             }
@@ -71,8 +71,13 @@ namespace transpiler
                 {
                     var currentToken = Tokens.GetByIndex(tokenCounter++);
 
-                    if (currentToken.IsStatementType("where"))
+                    if (currentToken.IsEOF)
                     {
+                        return tokenRange;
+                    }
+                    else if (currentToken.IsStatementType("where"))
+                    {
+                        Console.WriteLine("Where statement");
                         try
                         {
                             tokenRange.Add(ParseWhereStatement(currentToken));

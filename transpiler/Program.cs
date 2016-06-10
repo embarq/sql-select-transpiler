@@ -6,7 +6,7 @@ namespace transpiler
     {
         static void Main(string[] args)
         {
-            string SQL = @"SELECT id COUNT(name), age, MAX(reputation) FROM users GROUP BY name WHERE age > 18;";
+            string SQL = @"SELECT id, COUNT(name), age, MAX(reputation) FROM users GROUP BY name WHERE age > 18;";
 
             var tokens = new Lexer(SQL).Analyze();
 
