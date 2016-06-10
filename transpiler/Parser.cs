@@ -71,7 +71,18 @@ namespace transpiler
                 {
                     var currentToken = Tokens.GetByIndex(tokenCounter++);
 
-                    if (Config.Patterns.Function.IsMatch(currentToken.Type))
+                    if (token.Type.Equals("where_stmt"))
+                    {
+                        try
+                        {
+                            tokenRange.Add(ParseWhereStatement(currentToken));
+                        }
+                        catch (Exception err)
+                        {
+                            throw err;
+                        }
+                    }
+                    else if (Config.Patterns.Function.IsMatch(currentToken.Type))
                     {
                         try
                         {
@@ -112,6 +123,17 @@ namespace transpiler
             return tokenRange;
         }
 
+        TokenCollection ParseWhereStatement(Token token)
+        {
+            var clauseRange = GetClauseRange(token);
+        }
+
+        TokenCollection GetClauseRange(Token token)
+        {
+            var tokenRange = new TokenCollection();
+
+        }
+
         TokenCollection ParseFunction(Token token)
         {
             var range = GetFunctionRange(token);
@@ -149,14 +171,12 @@ namespace transpiler
         TokenCollection GetFunctionRange(Token token)
         {
             TokenCollection tokenRange = new TokenCollection();
-            int tokenCounter = token.Index;
 
             try
             {
-                while (Tokens.GetByIndex(tokenCounter).Type.Equals("separator") ||
-                    !Config.Patterns.Statement.IsMatch(Tokens.GetByIndex(tokenCounter).Type))
+                for (int i = token.Index; i < token.Index + Config.functionStatementLength; i++)
                 {
-                    tokenRange.Add(Tokens.GetByIndex(tokenCounter++));
+                    tokenRange.Add(Tokens.GetByIndex(i));
                 }
             }
             catch (ArgumentOutOfRangeException)
