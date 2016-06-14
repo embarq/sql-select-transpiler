@@ -6,6 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "transpiler", "transpiler\transpiler.csproj", "{FD458731-72A6-4789-87D1-063DCE62EF3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "database", "database\database.csproj", "{E665767F-4825-4B29-B4A3-1084341B7991}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FD458731-72A6-4789-87D1-063DCE62EF3A} = {FD458731-72A6-4789-87D1-063DCE62EF3A}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "transpiler-test", "transpiler-test\transpiler-test.csproj", "{58485573-5727-44E4-881E-E84C621222BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FD458731-72A6-4789-87D1-063DCE62EF3A} = {FD458731-72A6-4789-87D1-063DCE62EF3A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,10 @@ Global
 		{E665767F-4825-4B29-B4A3-1084341B7991}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E665767F-4825-4B29-B4A3-1084341B7991}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E665767F-4825-4B29-B4A3-1084341B7991}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58485573-5727-44E4-881E-E84C621222BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58485573-5727-44E4-881E-E84C621222BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58485573-5727-44E4-881E-E84C621222BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58485573-5727-44E4-881E-E84C621222BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

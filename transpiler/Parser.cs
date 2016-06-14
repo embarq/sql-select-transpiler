@@ -1,38 +1,49 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System;
 
 namespace transpiler
 {
     class Parser
     {
-        TokenCollection Tokens;
+        private TokenCollection Tokens;
+        public TokenCollection parsedTokens;
+        public bool Status { get; }
 
         public Parser(TokenCollection tokens)
         {
-            this.Tokens = tokens;
+            Tokens = tokens;
+            parsedTokens = new TokenCollection();
 
-            if (!(tokens.HasType("select") && tokens.HasType("from") && tokens.HasType("eof")))
+            if (!tokens.HasType("select"))
             {
-                throw SqlException.StatementsException;
+                throw SqlException.InvalidSelectStatementSyntax;
             }
-
-            // Парсинг начинается с statement'ов
-            foreach (Token token in this.Tokens.List)
+            else if (!tokens.HasType("from"))
             {
-                if (token.IsStatement)
+                throw SqlException.MissingFromStatement;
+            }
+            else if (!tokens.HasType("eof"))
+            {
+                throw SqlException.MissingEndOfLineToken;
+            }
+            
+            foreach (Token token in Tokens.List)
+            {
+                try
                 {
-                    try
+                    if (token.IsStatement)
                     {
-                        ParseStatement(token);
-                    }
-                    catch (Exception err)
-                    {
-                        Helpers.Logger(err);
-                        throw err;
+                        parsedTokens.Add(ParseStatement(token));
                     }
                 }
+                catch (Exception exception)
+                {
+                    Status = false;
+                    throw exception;
+                }
             }
+            
+            Status = true;
         }
 
         TokenCollection ParseStatement(Token token)
@@ -41,22 +52,20 @@ namespace transpiler
 
             try
             {
-                statementRange = GetStatementRange(token);
+                if (token.IsWhereStatement)
+                {
+                    statementRange = ParseClauseExpression(token);
+                }
+                else
+                {
+                    statementRange = GetStatementRange(token);
+                }
             }
             catch (Exception err)
             {
                 throw err;
             }
             
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("`{0}` statement range is {1}",
-                token.Type,
-                statementRange.TokenString);
-
-            statementRange.Print();
-            Console.ForegroundColor = ConsoleColor.White;
-
             return statementRange;
         }
 
@@ -67,25 +76,15 @@ namespace transpiler
 
             try
             {
-                while (!Tokens.GetByIndex(tokenCounter).IsStatement)
+                Token currentToken = null;
+
+                do
                 {
-                    var currentToken = Tokens.GetByIndex(tokenCounter++);
+                    currentToken = Tokens.GetByIndex(tokenCounter++);
 
                     if (currentToken.IsEOF)
                     {
                         return tokenRange;
-                    }
-                    else if (currentToken.IsStatementType("where"))
-                    {
-                        Console.WriteLine("Where statement");
-                        try
-                        {
-                            tokenRange.Add(ParseWhereStatement(currentToken));
-                        }
-                        catch (InvalidOperationException err)
-                        {
-                            throw err;
-                        }
                     }
                     else if (currentToken.IsFunction)
                     {
@@ -99,9 +98,15 @@ namespace transpiler
                             throw err;
                         }
                     }
-                    else if (currentToken.IsVariable || currentToken.IsArythmetic || currentToken.IsComparator)
+                    else if (currentToken.IsVariable)
                     {
-                        tokenRange.Add(currentToken);
+                        Token nextToken = Tokens.GetByIndex(tokenCounter + 1);
+
+                        if (nextToken.IsSeparator || nextToken.IsVariable || nextToken.IsStatement || nextToken.IsEOF)
+                        {
+                            tokenRange.Add(currentToken);
+                        }
+                        
                     }
                     else if (currentToken.IsSeparator)
                     {
@@ -109,11 +114,10 @@ namespace transpiler
                     }
                     else
                     {
-                        throw SqlException.SelectStatementException;
+                        throw SqlException.InvalidSelectStatementSyntax;
                     }
-                }
+                } while (!currentToken.IsStatement);
             }
-            // This two catches are going to catch overrange
             catch (NullReferenceException)
             {
                 return tokenRange;
@@ -126,32 +130,18 @@ namespace transpiler
             return tokenRange;
         }
 
-        TokenCollection ParseWhereStatement(Token token)
-        {
-            TokenCollection clauseExpression = null;
-            try
-            {
-                clauseExpression = ParseClauseExpression(token);
-            }
-            catch (InvalidOperationException)
-            {
-                throw SqlException.WhereStatementException;
-            }
-
-            return clauseExpression;
-        }
-
         TokenCollection ParseClauseExpression(Token token)
         {
             var clauseRange = GetClauseRange(token);
-            var comparator = clauseRange.List.Find(_token => _token.IsComparator);
-            var left = clauseRange.Get(0);
-            var right = clauseRange.Get(2);
-
-            if (comparator.Equals(null))
+            
+            if (!clauseRange.Get(1).IsComparator)
             {
-                throw SqlException.ClauseExpressionException;
+                throw SqlException.InvalidClauseExpressionSyntax;
             }
+
+            var temp = clauseRange.List[0];
+            clauseRange.List[0] = clauseRange.List[1];
+            clauseRange.List[1] = temp;
 
             return clauseRange;
         }
@@ -159,14 +149,18 @@ namespace transpiler
         TokenCollection GetClauseRange(Token token)
         {
             var tokenRange = new TokenCollection();
-            int tokenCounter = token.Index;
+            int tokenCounter = token.Index + 1;
 
             try {
-                while (!Tokens.GetByIndex(tokenCounter).IsStatement || !Tokens.GetByIndex(tokenCounter).IsEOF)
+                while (!Tokens.GetByIndex(tokenCounter).IsStatement)
                 {
                     var currentToken = Tokens.GetByIndex(tokenCounter++);
 
-                    if (currentToken.IsVariable ||
+                    if (currentToken.IsEOF)
+                    {
+                        return tokenRange;
+                    }
+                    else if (currentToken.IsVariable ||
                         currentToken.IsArythmetic ||
                         currentToken.IsDigit ||
                         currentToken.IsComparator ||
@@ -176,7 +170,7 @@ namespace transpiler
                     }
                     else
                     {
-                        throw SqlException.WhereStatementException;
+                        throw SqlException.IvalidWhereStatementSyntax;
                     }
                 }
             }
@@ -196,7 +190,7 @@ namespace transpiler
             {
                 // a SQL function should consist of four tokens:
                 // <func_name> <parenthes> <argument> <parenthes>
-                throw SqlException.FunctionException;
+                throw SqlException.InvalidFunctionSyntax;
             }
 
             bool[] check = {
@@ -215,7 +209,7 @@ namespace transpiler
             }
             else
             {
-                throw SqlException.FunctionException;
+                throw SqlException.InvalidFunctionSyntax;
             }
         }
 
